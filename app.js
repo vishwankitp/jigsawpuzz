@@ -70,8 +70,24 @@ function beginDrag(e) {
 }
 
 function placeOnBoard(piece, x, y, br) {
-  board.append(piece); const cellW = br.width / 4, cellH = br.height / 4;
+  const sourceCell = piece.parentElement === board ? piece.dataset.cell : null;
+  const cellW = br.width / 4, cellH = br.height / 4;
   const col = Math.max(0, Math.min(3, Math.floor(x / cellW))); const row = Math.max(0, Math.min(3, Math.floor(y / cellH)));
+  const targetCell = `${row},${col}`;
+  const occupied = [...board.querySelectorAll('.piece')].find(other => other !== piece && other.dataset.cell === targetCell);
+  if (occupied && sourceCell) {
+    const [oldRow, oldCol] = sourceCell.split(',').map(Number);
+    occupied.dataset.cell = sourceCell;
+    occupied.style.left = `${oldCol * 25}%`; occupied.style.top = `${oldRow * 25}%`;
+    const occupiedIndex = Number(occupied.dataset.index);
+    occupied.classList.toggle('correct', oldRow === Math.floor(occupiedIndex / 4) && oldCol === occupiedIndex % 4 && Number(occupied.dataset.rotation) === 0);
+  } else if (occupied) {
+    occupied.dataset.cell = '';
+    occupied.style.left = ''; occupied.style.top = '';
+    occupied.classList.remove('correct');
+    tray.append(occupied);
+  }
+  board.append(piece);
   piece.dataset.cell = `${row},${col}`; piece.style.left = `${col * 25}%`; piece.style.top = `${row * 25}%`;
   const index = Number(piece.dataset.index); const correct = row === Math.floor(index/4) && col === index%4 && Number(piece.dataset.rotation) === 0;
   piece.classList.toggle('correct', correct);
