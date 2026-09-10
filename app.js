@@ -41,7 +41,7 @@ function makePiece(index) {
   const el = document.createElement('div');
   const row = Math.floor(index / 4), col = index % 4;
   el.className = 'piece'; el.dataset.index = index; el.dataset.rotation = [0,90,180,270][Math.floor(Math.random()*4)];
-  el.style.backgroundPosition = `${col * 33.333}% ${row * 33.333}%`;
+  el.style.backgroundPosition = `${20 - col * 20}% ${row * 33.333}%`;
   el.style.transform = `rotate(${el.dataset.rotation}deg)`;
   el.setAttribute('aria-label', `Puzzle piece ${index + 1}`);
   el.addEventListener('pointerdown', beginDrag);
