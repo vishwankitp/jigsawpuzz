@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brave New World — Puzzle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="site-header">
+        <a class="brand" href="#" aria-label="Brave New World home">BRAVE <em>NEW</em> WORLD</a>
+        <a class="leaderboard-link" href="leaderboard.html" target="_blank" rel="noopener">Leaderboard <span>↗</span></a>
+      </header>
+
+      <section class="screen intro-screen active" id="introScreen">
+        <div class="intro-copy">
+          <p class="eyebrow">THE ASSEMBLY / 001</p>
+          <h1>Can you see<br />the whole picture?</h1>
+          <p class="lede">Reconstruct a fractured vision of tomorrow. Sixteen pieces. Two minutes and thirty seconds. A little disorientation is part of the design.</p>
+          <form id="playerForm" class="player-form">
+            <label><span>Your name</span><input id="playerName" required maxlength="32" placeholder="Enter your name" autocomplete="name" /></label>
+            <label><span>Email address</span><input id="playerEmail" required type="email" placeholder="you@example.com" autocomplete="email" /></label>
+            <button class="primary-button" id="startButton" type="submit" disabled>Begin the assembly <span>→</span></button>
+          </form>
+        </div>
+        <div class="hero-image-wrap">
+          <img src="assets/brave-new-world.png" alt="Brave New World artwork: a futuristic surreal collage" />
+          <div class="image-caption">REFERENCE IMAGE / 2049</div>
+        </div>
+      </section>
+
+      <section class="screen game-screen" id="gameScreen">
+        <div class="game-topline">
+          <div><p class="eyebrow">PLAYER</p><strong id="playerDisplay"></strong></div>
+          <div class="timer-wrap"><p class="eyebrow">TIME REMAINING</p><strong class="timer" id="timer">03:00</strong></div>
+          <button class="quiet-button" id="restartButton">Restart</button>
+        </div>
+        <div class="game-layout">
+          <aside class="reference-card">
+            <p class="eyebrow">THE COMPLETE VISION</p>
+            <img src="assets/brave-new-world.png" alt="Reference for the completed puzzle" />
+            <p>Drag pieces into the frame. Select a piece and use <kbd>R</kbd> or rotate it with the button.</p>
+          </aside>
+          <section class="puzzle-area">
+            <div class="puzzle-toolbar"><span id="pieceCount">16 pieces remaining</span><button class="rotate-button" id="rotateButton" disabled>↻ Rotate selected</button></div>
+            <div class="puzzle-board" id="puzzleBoard" aria-label="Puzzle board"></div>
+            <div class="piece-tray" id="pieceTray" aria-label="Puzzle pieces"></div>
+            <div class="action-row"><p id="gameStatus">Place every piece, then submit your solution.</p><button class="primary-button" id="submitPuzzle">Submit solution <span>→</span></button></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="screen result-screen" id="resultScreen">
+        <div class="confetti" id="confetti"></div>
+        <p class="eyebrow">ASSEMBLY COMPLETE</p>
+        <h2>20 points<br /><em>received.</em></h2>
+        <p class="result-note">You restored the picture. The record has been entered into the archive.</p>
+        <div class="result-stats"><div><span>PLAYER</span><strong id="resultName"></strong></div><div><span>YOUR TIME</span><strong id="resultTime"></strong></div></div>
+        <div class="result-actions"><button class="primary-button" id="viewLeaderboard">View leaderboard <span>→</span></button><button class="quiet-button" id="playAgain">Play again</button></div>
+      </section>
+
+      <section class="screen leaderboard-screen" id="leaderboardScreen">
+        <div class="leaderboard-heading"><div><p class="eyebrow">THE ARCHIVE</p><h2>Fastest<br /><em>assemblies.</em></h2></div><button class="quiet-button" id="backHome">← Back home</button></div>
+        <div class="leaderboard-table"><div class="table-head"><span>RANK</span><span>PLAYER</span><span>TIME</span><span>POINTS</span></div><div id="leaderboardRows"></div></div>
+      </section>
+    </main>
+    <div class="toast" id="toast"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
