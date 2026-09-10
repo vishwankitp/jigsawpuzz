@@ -79,15 +79,24 @@ function placeOnBoard(piece, x, y, br) {
 
 function updatePieceCount() { const n = tray.querySelectorAll('.piece').length; document.querySelector('#pieceCount').textContent = `${n || 'All'} ${n === 1 ? 'piece' : 'pieces'} ${n ? 'remaining' : 'placed'}`; }
 document.querySelector('#submitPuzzle').addEventListener('click', submitPuzzle);
-function submitPuzzle() {
+async function submitPuzzle() {
   if (timedOut) return showToast('Time is up — please restart the puzzle.');
   const pieces = [...board.querySelectorAll('.piece')];
   const correct = pieces.length === 16 && pieces.every(p => Number(p.dataset.rotation) === 0 && p.dataset.cell === `${Math.floor(Number(p.dataset.index)/4)},${Number(p.dataset.index)%4}`);
   if (!correct) return showToast('Not quite. Check every position and orientation.');
-  const elapsed = Math.min(150, Math.floor((Date.now()-startedAt)/1000)); clearInterval(timerId); saveScore(elapsed); showResult(elapsed);
+  const elapsed = Math.min(150, Math.floor((Date.now()-startedAt)/1000)); clearInterval(timerId);
+  try { await saveScore(elapsed); } catch { showToast('Your score could not be saved. Please check the database setup.'); }
+  showResult(elapsed);
 }
 
-function saveScore(seconds) { const scores = JSON.parse(localStorage.getItem('brave-new-world-scores') || '[]'); scores.push({name:player.name, seconds, points:20, date:Date.now()}); scores.sort((a,b) => a.seconds-b.seconds || a.date-b.date); localStorage.setItem('brave-new-world-scores', JSON.stringify(scores.slice(0,50))); }
+async function saveScore(seconds) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/leaderboard_entries`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`, Prefer: 'return=minimal' },
+    body: JSON.stringify({ name: player.name, time_seconds: seconds, points: 20 })
+  });
+  if (!response.ok) throw new Error('Unable to save score');
+}
 function showResult(seconds) { document.querySelector('#resultName').textContent = player.name; document.querySelector('#resultTime').textContent = secondsText(seconds); showScreen('resultScreen'); makeConfetti(); }
 function makeConfetti() { const wrap = document.querySelector('#confetti'); wrap.innerHTML = ''; for (let i=0;i<42;i++) { const c=document.createElement('i'); c.style.left=Math.random()*100+'%'; c.style.animationDelay=Math.random()*2+'s'; c.style.background=['#c9442d','#101518','#9db8c4','#e5b05f'][i%4]; c.style.transform=`rotate(${Math.random()*90}deg)`; wrap.append(c); } }
 function renderLeaderboard() { const scores = JSON.parse(localStorage.getItem('brave-new-world-scores') || '[]'); const rows = document.querySelector('#leaderboardRows'); rows.innerHTML = scores.length ? scores.map((s,i) => `<div class="leaderboard-row"><span class="rank">${String(i+1).padStart(2,'0')}</span><strong>${escapeHTML(s.name)}</strong><span class="time">${secondsText(s.seconds)}</span><span>${s.points}</span></div>`).join('') : '<p class="empty-row">No completed assemblies yet. Be the first to enter the archive.</p>'; }
