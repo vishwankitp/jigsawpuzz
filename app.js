@@ -118,5 +118,3 @@ function makeConfetti() { const wrap = document.querySelector('#confetti'); wrap
 function renderLeaderboard() { const scores = JSON.parse(localStorage.getItem('brave-new-world-scores') || '[]'); const rows = document.querySelector('#leaderboardRows'); rows.innerHTML = scores.length ? scores.map((s,i) => `<div class="leaderboard-row"><span class="rank">${String(i+1).padStart(2,'0')}</span><strong>${escapeHTML(s.name)}</strong><span class="time">${secondsText(s.seconds)}</span><span>${s.points}</span></div>`).join('') : '<p class="empty-row">No completed assemblies yet. Be the first to enter the archive.</p>'; }
 function escapeHTML(value) { const el=document.createElement('div'); el.textContent=value; return el.innerHTML; }
 document.querySelector('#backHome').addEventListener('click', () => showScreen('introScreen'));
-document.querySelector('#playAgain').addEventListener('click', () => startGame());
-document.querySelector('#restartButton').addEventListener('click', () => { if (confirm('Restart the puzzle? Your current time will be lost.')) startGame(); });
