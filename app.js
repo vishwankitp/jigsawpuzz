@@ -2,7 +2,6 @@ const image = 'assets/brave-new-world.png';
 const screens = ['introScreen', 'gameScreen', 'resultScreen', 'leaderboardScreen'];
 const board = document.querySelector('#puzzleBoard');
 const tray = document.querySelector('#pieceTray');
-const rotateButton = document.querySelector('#rotateButton');
 let player, startedAt, timerId, selectedPiece = null, timedOut = false;
 
 function showScreen(id) { screens.forEach(s => document.querySelector('#' + s).classList.toggle('active', s === id)); }
@@ -23,7 +22,7 @@ nameInput.addEventListener('input', updateStartButton);
 emailInput.addEventListener('input', updateStartButton);
 
 function startGame() {
-  clearInterval(timerId); timedOut = false; selectedPiece = null; rotateButton.disabled = true;
+  clearInterval(timerId); timedOut = false; selectedPiece = null;
   board.innerHTML = ''; tray.innerHTML = ''; showScreen('gameScreen');
   const pieces = Array.from({length:16}, (_, i) => i).sort(() => Math.random() - .5);
   pieces.forEach(makePiece);
@@ -45,22 +44,23 @@ function makePiece(index) {
   el.style.backgroundPosition = `${col * 33.333}% ${row * 33.333}%`;
   el.style.transform = `rotate(${el.dataset.rotation}deg)`;
   el.setAttribute('aria-label', `Puzzle piece ${index + 1}`);
-  el.addEventListener('pointerdown', beginDrag); el.addEventListener('click', () => selectPiece(el));
+  el.addEventListener('pointerdown', beginDrag);
   tray.append(el);
 }
 
-function selectPiece(piece) { document.querySelectorAll('.piece.selected').forEach(p => p.classList.remove('selected')); selectedPiece = piece; piece.classList.add('selected'); rotateButton.disabled = false; }
-function rotateSelected() { if (!selectedPiece) return; const value = (Number(selectedPiece.dataset.rotation) + 90) % 360; selectedPiece.dataset.rotation = value; selectedPiece.style.transform = `rotate(${value}deg)`; }
-rotateButton.addEventListener('click', rotateSelected);
+function selectPiece(piece) { document.querySelectorAll('.piece.selected').forEach(p => p.classList.remove('selected')); selectedPiece = piece; piece.classList.add('selected'); }
+function rotatePiece(piece) { const value = (Number(piece.dataset.rotation) + 90) % 360; piece.dataset.rotation = value; piece.style.transform = `rotate(${value}deg)`; }
+function rotateSelected() { if (selectedPiece) rotatePiece(selectedPiece); }
 document.addEventListener('keydown', e => { if (e.key.toLowerCase() === 'r' && document.querySelector('#gameScreen').classList.contains('active')) { e.preventDefault(); rotateSelected(); }});
 
 function beginDrag(e) {
   if (timedOut) return; const piece = e.currentTarget; selectPiece(piece); piece.setPointerCapture(e.pointerId); piece.classList.add('dragging');
   const wasOnBoard = piece.parentElement === board;
-  const startRect = piece.getBoundingClientRect(); const dx = e.clientX - startRect.left, dy = e.clientY - startRect.top;
-  const move = ev => { piece.style.position = 'fixed'; piece.style.left = `${ev.clientX - dx}px`; piece.style.top = `${ev.clientY - dy}px`; piece.style.width = `${startRect.width}px`; piece.style.height = `${startRect.height}px`; };
+  const startRect = piece.getBoundingClientRect(); const startX = e.clientX, startY = e.clientY; const dx = e.clientX - startRect.left, dy = e.clientY - startRect.top; let didDrag = false;
+  const move = ev => { if (!didDrag && Math.hypot(ev.clientX - startX, ev.clientY - startY) <= 6) return; didDrag = true; piece.style.position = 'fixed'; piece.style.left = `${ev.clientX - dx}px`; piece.style.top = `${ev.clientY - dy}px`; piece.style.width = `${startRect.width}px`; piece.style.height = `${startRect.height}px`; };
   const end = ev => {
     piece.removeEventListener('pointermove', move); piece.removeEventListener('pointerup', end); piece.removeEventListener('pointercancel', end); piece.classList.remove('dragging');
+    if (!didDrag) { rotatePiece(piece); return; }
     const br = board.getBoundingClientRect(); const inside = ev.clientX >= br.left && ev.clientX <= br.right && ev.clientY >= br.top && ev.clientY <= br.bottom;
     piece.style.position = ''; piece.style.left = ''; piece.style.top = ''; piece.style.width = ''; piece.style.height = '';
     if (inside) placeOnBoard(piece, ev.clientX - br.left, ev.clientY - br.top, br); else if (!wasOnBoard) tray.append(piece); else placeOnBoard(piece, startRect.left - br.left, startRect.top - br.top, br);
