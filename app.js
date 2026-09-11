@@ -10,16 +10,14 @@ function showToast(text) { const toast = document.querySelector('#toast'); toast
 
 document.querySelector('#playerForm').addEventListener('submit', e => {
   e.preventDefault();
-  player = { name: document.querySelector('#playerName').value.trim(), email: document.querySelector('#playerEmail').value.trim() };
+  player = { name: document.querySelector('#playerName').value.trim() };
   document.querySelector('#playerDisplay').textContent = player.name;
   startGame();
 });
 const nameInput = document.querySelector('#playerName');
-const emailInput = document.querySelector('#playerEmail');
 const startButton = document.querySelector('#startButton');
-function updateStartButton() { startButton.disabled = !nameInput.value.trim() || !emailInput.validity.valid; }
+function updateStartButton() { startButton.disabled = !nameInput.value.trim(); }
 nameInput.addEventListener('input', updateStartButton);
-emailInput.addEventListener('input', updateStartButton);
 
 function startGame() {
   clearInterval(timerId); timedOut = false; selectedPiece = null;
