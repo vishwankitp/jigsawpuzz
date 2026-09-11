@@ -2,7 +2,7 @@
 create table if not exists public.wordle_scores (
   id bigint generated always as identity primary key,
   cc_code text not null unique check (char_length(cc_code) between 1 and 32),
-  attempts integer not null check (attempts between 1 and 6),
+  attempts integer not null check (attempts >= 1),
   created_at timestamptz not null default now()
 );
 
