@@ -101,19 +101,21 @@ async function submitPuzzle() {
   const correct = pieces.length === 16 && pieces.every(p => Number(p.dataset.rotation) === 0 && p.dataset.cell === `${Math.floor(Number(p.dataset.index)/4)},${Number(p.dataset.index)%4}`);
   if (!correct) return showToast('Not quite. Check every position and orientation.');
   const elapsed = Math.min(150, Math.floor((Date.now()-startedAt)/1000)); clearInterval(timerId);
-  try { await saveScore(elapsed); } catch { showToast('Your score could not be saved. Please check the database setup.'); }
-  showResult(elapsed);
+  let saved = false;
+  try { saved = await saveScore(elapsed); } catch { showToast('Your score could not be saved. Please check the database setup.'); }
+  showResult(elapsed, saved);
 }
 
 async function saveScore(seconds) {
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/leaderboard_entries`, {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/record_puzzle_score`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`, Prefer: 'return=minimal' },
-    body: JSON.stringify({ name: player.name, time_seconds: seconds, points: 20 })
+    body: JSON.stringify({ p_cc_code: player.name.toUpperCase(), p_time_seconds: seconds })
   });
   if (!response.ok) throw new Error('Unable to save score');
+  return response.json();
 }
-function showResult(seconds) { document.querySelector('#resultName').textContent = player.name; document.querySelector('#resultTime').textContent = secondsText(seconds); showScreen('resultScreen'); makeConfetti(); }
+function showResult(seconds, saved) { document.querySelector('#resultName').textContent = player.name; document.querySelector('#resultTime').textContent = secondsText(seconds); document.querySelector('.result-note').textContent = saved ? 'Your first completion has been entered into the archive.' : 'Thanks for playing again. Your first completion was already recorded.'; showScreen('resultScreen'); makeConfetti(); }
 function makeConfetti() { const wrap = document.querySelector('#confetti'); wrap.innerHTML = ''; for (let i=0;i<42;i++) { const c=document.createElement('i'); c.style.left=Math.random()*100+'%'; c.style.animationDelay=Math.random()*2+'s'; c.style.background=['#c9442d','#101518','#9db8c4','#e5b05f'][i%4]; c.style.transform=`rotate(${Math.random()*90}deg)`; wrap.append(c); } }
 function renderLeaderboard() { const scores = JSON.parse(localStorage.getItem('brave-new-world-scores') || '[]'); const rows = document.querySelector('#leaderboardRows'); rows.innerHTML = scores.length ? scores.map((s,i) => `<div class="leaderboard-row"><span class="rank">${String(i+1).padStart(2,'0')}</span><strong>${escapeHTML(s.name)}</strong><span class="time">${secondsText(s.seconds)}</span><span>${s.points}</span></div>`).join('') : '<p class="empty-row">No completed assemblies yet. Be the first to enter the archive.</p>'; }
 function escapeHTML(value) { const el=document.createElement('div'); el.textContent=value; return el.innerHTML; }
