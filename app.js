@@ -105,17 +105,11 @@ async function submitPuzzle() {
 }
 
 async function saveScore(seconds) {
-  const response = await fetch('https://jigsawpuzz.vishwankit-pandhare2026.workers.dev/puzzle', {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/record_puzzle_score`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      cc_code: player.name,
-      time_seconds: seconds
-    })
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`, Prefer: 'return=minimal' },
+    body: JSON.stringify({ p_cc_code: player.name.toUpperCase(), p_time_seconds: seconds })
   });
-
   if (!response.ok) throw new Error('Unable to save score');
   return response.json();
 }
