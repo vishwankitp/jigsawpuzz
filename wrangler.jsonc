@@ -1,0 +1,12 @@
+{
+  "name": "jigsawpuzz",
+  "compatibility_date": "2026-10-05",
+  "main": "worker.js",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "event-games",
+      "database_id": "f6bbd6a7-7f04-4ebb-87b9-e13bea2378fe"
+    }
+  ]
+}
